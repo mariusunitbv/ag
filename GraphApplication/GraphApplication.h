@@ -3,15 +3,13 @@
 #include <QtWidgets/QMainWindow>
 #include "ui_GraphApplication.h"
 
-class GraphApplication : public QMainWindow
-{
+class GraphApplication : public QMainWindow {
     Q_OBJECT
 
-public:
+   public:
     GraphApplication(QWidget *parent = nullptr);
     ~GraphApplication();
 
-private:
+   private:
     Ui::GraphApplicationClass ui;
 };
-
