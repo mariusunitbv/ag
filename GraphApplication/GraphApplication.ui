@@ -13,9 +13,39 @@
   <property name="windowTitle">
    <string>GraphApplication</string>
   </property>
-  <widget class="QWidget" name="centralWidget"/>
+  <widget class="QWidget" name="centralWidget">
+   <widget class="QLabel" name="label">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>8</y>
+      <width>128</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Aplicație Grafuri</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>8</x>
+      <y>24</y>
+      <width>200</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Proiect realizat de Țocu Marius Daniel</string>
+    </property>
+   </widget>
+  </widget>
   <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>0</x>
