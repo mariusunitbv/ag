@@ -11,7 +11,8 @@ class Graph {
     void SelectNodesDescending(size_t start, size_t end);
     void DeselectAllNodes();
 
-    void SetMovedNode(Node* node);
+    void SetDraggedNode(Node* node);
+    void DragNode(Node* node, QPoint where);
 
     void ConnectNodes();
     void DeleteSelectedNodes();
@@ -23,11 +24,15 @@ class Graph {
     const Node* GetNearestNode(QPoint where, int additionalRadius = 0) const;
 
     bool CanPlaceNode(QPoint where) const;
-    bool CanMoveNode(Node* movedNode, QPoint where) const;
+    bool CanDragNodeTo(Node* movedNode, QPoint where) const;
 
     const std::vector<Node*>& GetNodes() const;
     const std::vector<Edge>& GetEdges() const;
-    Node* GetMovedNode() const;
+    Node* GetDraggedNode() const;
+
+    void MakeGraphUnoriented();
+    void SetOrientedGraph(bool state);
+    bool IsOrientedGraph() const;
 
     void SaveGraph() const;
 
@@ -37,5 +42,6 @@ class Graph {
     std::vector<Node*> m_nodes, m_selectedNodes;
     std::vector<Edge> m_edges;
 
-    Node* m_movedNode;
+    Node* m_draggedNode;
+    bool m_unorientedGraph;
 };

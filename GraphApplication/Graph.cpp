@@ -62,7 +62,9 @@ void Graph::DeselectAllNodes() {
     m_selectedNodes.clear();
 }
 
-void Graph::SetMovedNode(Node* node) { m_movedNode = node; }
+void Graph::SetDraggedNode(Node* node) { m_draggedNode = node; }
+
+void Graph::DragNode(Node* node, QPoint where) { node->SetPosition(where); }
 
 void Graph::ConnectNodes() {
     if (m_selectedNodes.size() < 2) {
@@ -115,7 +117,7 @@ void Graph::DeleteSelectedNodes() {
 
 void Graph::AddEdge(Node* l, Node* r) {
     auto it = std::find_if(m_edges.begin(), m_edges.end(), [&](const Edge& edge) {
-        return edge.GetSource() == l && edge.GetTarget() == r;
+        return m_unorientedGraph ? edge.SameAsUnoriented(l, r) : edge.SameAs(l, r);
     });
 
     if (it != m_edges.end()) {
@@ -136,8 +138,9 @@ void Graph::TerminateEdgesOfSelectedNodes() {
         Node *source = m_selectedNodes[i], *target = m_selectedNodes[i + 1];
         m_edges.erase(std::remove_if(m_edges.begin(), m_edges.end(),
                                      [&](const Edge& edge) {
-                                         return edge.GetSource() == source &&
-                                                edge.GetTarget() == target;
+                                         return m_unorientedGraph
+                                                    ? edge.SameAsUnoriented(source, target)
+                                                    : edge.SameAs(source, target);
                                      }),
                       m_edges.end());
     }
@@ -177,7 +180,7 @@ bool Graph::CanPlaceNode(QPoint where) const {
     return GetNearestNode(where, Node::kNodeRadius) == nullptr;
 }
 
-bool Graph::CanMoveNode(Node* movedNode, QPoint where) const {
+bool Graph::CanDragNodeTo(Node* movedNode, QPoint where) const {
     if (where.x() <= Node::kNodeRadius || where.y() <= Node::kNodeRadius) {
         return false;
     }
@@ -200,7 +203,26 @@ const std::vector<Node*>& Graph::GetNodes() const { return m_nodes; }
 
 const std::vector<Edge>& Graph::GetEdges() const { return m_edges; }
 
-Node* Graph::GetMovedNode() const { return m_movedNode; }
+Node* Graph::GetDraggedNode() const { return m_draggedNode; }
+
+void Graph::MakeGraphUnoriented() {
+    std::vector<Edge> uniqueEdges;
+
+    for (const auto& edge : m_edges) {
+        auto it = std::find_if(uniqueEdges.begin(), uniqueEdges.end(),
+                               [&](const Edge& e) { return e.SameAsUnoriented(edge); });
+
+        if (it == uniqueEdges.end()) {
+            uniqueEdges.push_back(edge);
+        }
+    }
+
+    m_edges = std::move(uniqueEdges);
+}
+
+void Graph::SetOrientedGraph(bool state) { m_unorientedGraph = !state; }
+
+bool Graph::IsOrientedGraph() const { return !m_unorientedGraph; }
 
 void Graph::SaveGraph() const {
     std::ofstream fin{"graph.out"};
@@ -214,6 +236,9 @@ void Graph::SaveGraph() const {
     for (const auto& edge : m_edges) {
         size_t srcIdx = edge.GetSource()->GetIndex(), targetIdx = edge.GetTarget()->GetIndex();
         adjacency[srcIdx * nodesCount + targetIdx] = true;
+        if (m_unorientedGraph) {
+            adjacency[targetIdx * nodesCount + srcIdx] = true;
+        }
     }
 
     for (size_t i = 0; i < nodesCount; ++i) {

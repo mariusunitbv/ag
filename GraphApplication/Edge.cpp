@@ -11,3 +11,18 @@ bool Edge::IsSelected() const {
     return GetSource()->IsSelected() && GetTarget()->IsSelected() &&
            GetSource()->GetSelectedIndex() < GetTarget()->GetSelectedIndex();
 }
+
+bool Edge::SameAs(const Edge& rhs) const {
+    return GetSource() == rhs.GetSource() && GetTarget() == rhs.GetTarget();
+}
+
+bool Edge::SameAs(Node* l, Node* r) const { return GetSource() == l && GetTarget() == r; }
+
+bool Edge::SameAsUnoriented(const Edge& rhs) const {
+    return (GetSource() == rhs.GetSource() && GetTarget() == rhs.GetTarget()) ||
+           (GetSource() == rhs.GetTarget() && GetTarget() == rhs.GetSource());
+}
+
+bool Edge::SameAsUnoriented(Node* l, Node* r) const {
+    return (GetSource() == l && GetTarget() == r) || (GetSource() == r && GetTarget() == l);
+}

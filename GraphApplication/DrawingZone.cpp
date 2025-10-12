@@ -4,6 +4,36 @@
 DrawingZone::DrawingZone(QWidget* parent)
     : m_regularFont("Consolas", 14), m_smallFont("Consolas", 8) {
     setFocusPolicy(Qt::ClickFocus);
+
+    m_graph.SetOrientedGraph(true);
+}
+
+void DrawingZone::RadioOptionSelected(int index) {
+    switch (index) {
+        case 1:
+            m_graph.SetOrientedGraph(true);
+            break;
+        case 2:
+            if (m_graph.GetEdges().size() > 1) {
+                QMessageBox::StandardButton reply;
+                reply = QMessageBox::warning(this, "Atentie",
+                                             "Unele arce ar putea fi sterse, pentru a putea face "
+                                             "graful neorientat.\nContinuam?",
+                                             QMessageBox::Yes | QMessageBox::No);
+
+                if (reply == QMessageBox::Yes) {
+                    m_graph.MakeGraphUnoriented();
+                }
+            }
+
+            m_graph.SetOrientedGraph(false);
+            break;
+    }
+
+    this->setFocus();
+    update();
+
+    m_graph.SaveGraph();
 }
 
 void DrawingZone::mousePressEvent(QMouseEvent* event) {
@@ -16,7 +46,7 @@ void DrawingZone::mousePressEvent(QMouseEvent* event) {
     if (nearestNode) {
         const QPoint nodePos = nearestNode->GetCenter();
 
-        m_graph.SetMovedNode(nearestNode);
+        m_graph.SetDraggedNode(nearestNode);
         m_initialPosition = nodePos;
         m_startDragPosition = mousePos - nodePos;
 
@@ -30,13 +60,13 @@ void DrawingZone::mouseReleaseEvent(QMouseEvent* event) {
     }
 
     const QPoint mousePos = event->pos();
-    Node* movedNode = m_graph.GetMovedNode();
+    Node* movedNode = m_graph.GetDraggedNode();
     if (movedNode) {
         const QPoint nodePos = movedNode->GetCenter();
 
         unsetCursor();
 
-        m_graph.SetMovedNode(nullptr);
+        m_graph.SetDraggedNode(nullptr);
         if (nodePos != m_initialPosition) {
             return;
         }
@@ -54,17 +84,17 @@ void DrawingZone::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void DrawingZone::mouseMoveEvent(QMouseEvent* event) {
-    Node* movedNode = m_graph.GetMovedNode();
+    Node* movedNode = m_graph.GetDraggedNode();
     if (!movedNode) {
         return;
     }
 
     const QPoint newPosition = event->pos() - m_startDragPosition;
-    if (!m_graph.CanMoveNode(movedNode, newPosition)) {
+    if (!m_graph.CanDragNodeTo(movedNode, newPosition)) {
         return;
     }
 
-    movedNode->SetPosition(newPosition);
+    m_graph.DragNode(movedNode, newPosition);
     update();
 }
 
@@ -145,17 +175,18 @@ void DrawingZone::DrawEdges(QPainter* painter) const {
         const QPoint lineStart = srcCenter + radiusOffset;
         const QPoint lineEnd = targetCenter - radiusOffset;
 
-        const double angle = std::atan2(-direction.y(), direction.x());
-        const QPoint arrowP1 = lineEnd - QPoint(sin(angle + M_PI / 3) * Graph::kEdgeArrowSize,
-                                                cos(angle + M_PI / 3) * Graph::kEdgeArrowSize);
-        const QPoint arrowP2 =
-            lineEnd - QPoint(sin(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize,
-                             cos(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize);
-        const QPolygon arrowHead{lineEnd, arrowP1, arrowP2};
-
-        painter->setBrush(edge.IsSelected() ? Qt::green : Qt::black);
-
         painter->drawLine(lineStart, lineEnd);
-        painter->drawPolygon(arrowHead);
+        if (m_graph.IsOrientedGraph()) {
+            const double angle = std::atan2(-direction.y(), direction.x());
+            const QPoint arrowP1 = lineEnd - QPoint(sin(angle + M_PI / 3) * Graph::kEdgeArrowSize,
+                                                    cos(angle + M_PI / 3) * Graph::kEdgeArrowSize);
+            const QPoint arrowP2 =
+                lineEnd - QPoint(sin(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize,
+                                 cos(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize);
+            const QPolygon arrowHead{lineEnd, arrowP1, arrowP2};
+
+            painter->setBrush(edge.IsSelected() ? Qt::green : Qt::black);
+            painter->drawPolygon(arrowHead);
+        }
     }
 }

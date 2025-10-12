@@ -10,6 +10,8 @@ class DrawingZone : public QWidget {
    public:
     DrawingZone(QWidget* parent = nullptr);
 
+    void RadioOptionSelected(int index);
+
    protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
