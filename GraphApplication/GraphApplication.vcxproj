@@ -123,6 +123,7 @@
     <QtMoc Include="DrawingZone.h" />
     <ClInclude Include="Edge.h" />
     <ClInclude Include="Graph.h" />
+    <ClInclude Include="GraphType.h" />
     <ClInclude Include="Node.h" />
     <ClInclude Include="stdafx.h" />
     <ClCompile Include="Node.cpp" />

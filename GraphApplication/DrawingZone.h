@@ -10,7 +10,7 @@ class DrawingZone : public QWidget {
    public:
     DrawingZone(QWidget* parent = nullptr);
 
-    void RadioOptionSelected(int index);
+    bool SetGraphType(GraphType graphType);
 
    protected:
     void mousePressEvent(QMouseEvent* event) override;

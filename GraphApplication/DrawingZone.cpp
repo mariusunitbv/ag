@@ -8,21 +8,24 @@ DrawingZone::DrawingZone(QWidget* parent)
     m_graph.SetOrientedGraph(true);
 }
 
-void DrawingZone::RadioOptionSelected(int index) {
-    switch (index) {
-        case 1:
+bool DrawingZone::SetGraphType(GraphType graphType) {
+    switch (graphType) {
+        case GraphType::ORIENTED:
             m_graph.SetOrientedGraph(true);
             break;
-        case 2:
+        case GraphType::UNORIENTED:
             if (m_graph.GetEdges().size() > 1) {
-                QMessageBox::StandardButton reply;
-                reply = QMessageBox::warning(this, "Atentie",
-                                             "Unele arce ar putea fi sterse, pentru a putea face "
-                                             "graful neorientat.\nContinuam?",
-                                             QMessageBox::Yes | QMessageBox::No);
+                const auto reply =
+                    QMessageBox::warning(this, "Atentie",
+                                         "Unele arce ar putea fi sterse, pentru a putea face "
+                                         "graful neorientat.\nContinuam?",
+                                         QMessageBox::Yes | QMessageBox::No);
 
                 if (reply == QMessageBox::Yes) {
                     m_graph.MakeGraphUnoriented();
+                } else {
+                    this->setFocus();
+                    return false;
                 }
             }
 
@@ -34,6 +37,7 @@ void DrawingZone::RadioOptionSelected(int index) {
     update();
 
     m_graph.SaveGraph();
+    return true;
 }
 
 void DrawingZone::mousePressEvent(QMouseEvent* event) {
@@ -117,10 +121,12 @@ void DrawingZone::keyPressEvent(QKeyEvent* event) {
             update();
             break;
         case Qt::Key_PageUp:
+            m_graph.DeselectAllNodes();
             m_graph.SelectNodesAscending(0, m_graph.GetNodes().size());
             update();
             break;
         case Qt::Key_PageDown:
+            m_graph.DeselectAllNodes();
             m_graph.SelectNodesDescending(m_graph.GetNodes().size() - 1, 0);
             update();
             break;

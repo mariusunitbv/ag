@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Edge.h"
+#include "GraphType.h"
 
 class Graph {
    public:

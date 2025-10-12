@@ -9,7 +9,7 @@ Node* Edge::GetTarget() const { return m_pair.second; }
 
 bool Edge::IsSelected() const {
     return GetSource()->IsSelected() && GetTarget()->IsSelected() &&
-           GetSource()->GetSelectedIndex() < GetTarget()->GetSelectedIndex();
+           (GetSource()->GetSelectedIndex() == GetTarget()->GetSelectedIndex() - 1);
 }
 
 bool Edge::SameAs(const Edge& rhs) const {

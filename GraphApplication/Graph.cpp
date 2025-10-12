@@ -5,15 +5,13 @@ void Graph::AddNode(QPoint where) {
     Node* node = new Node(where, m_nodes.size());
 
     m_nodes.push_back(node);
-
     SaveGraph();
 }
 
 void Graph::ToggleSelectNode(Node* node) {
     if (node->IsSelected()) {
+        auto it = m_selectedNodes.erase(m_selectedNodes.begin() + node->GetSelectedIndex());
         node->Deselect();
-        auto it =
-            m_selectedNodes.erase(std::find(m_selectedNodes.begin(), m_selectedNodes.end(), node));
         for (; it != m_selectedNodes.end(); ++it) {
             Node* node = (*it);
             node->Select(node->GetSelectedIndex() - 1);
@@ -111,7 +109,7 @@ void Graph::DeleteSelectedNodes() {
                                  }),
                   m_nodes.end());
 
-    DeselectAllNodes();
+    m_selectedNodes.clear();
     SaveGraph();
 }
 
@@ -225,7 +223,7 @@ void Graph::SetOrientedGraph(bool state) { m_unorientedGraph = !state; }
 bool Graph::IsOrientedGraph() const { return !m_unorientedGraph; }
 
 void Graph::SaveGraph() const {
-    std::ofstream fin{"graph.out"};
+    std::ofstream fin{"graph.txt"};
 
     const size_t nodesCount = m_nodes.size();
 
@@ -234,7 +232,9 @@ void Graph::SaveGraph() const {
     std::vector<bool> adjacency;
     adjacency.resize(nodesCount * nodesCount);
     for (const auto& edge : m_edges) {
-        size_t srcIdx = edge.GetSource()->GetIndex(), targetIdx = edge.GetTarget()->GetIndex();
+        const size_t srcIdx = edge.GetSource()->GetIndex(),
+                     targetIdx = edge.GetTarget()->GetIndex();
+
         adjacency[srcIdx * nodesCount + targetIdx] = true;
         if (m_unorientedGraph) {
             adjacency[targetIdx * nodesCount + srcIdx] = true;
