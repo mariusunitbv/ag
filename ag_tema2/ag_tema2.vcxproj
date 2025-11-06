@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{D135BA39-E67E-4109-BED3-F69F8D8CCA47}</ProjectGuid>
+    <ProjectGuid>{CF8C1229-85EE-46D4-9375-E09A32470B91}</ProjectGuid>
     <Keyword>QtVS_v304</Keyword>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">10.0</WindowsTargetPlatformVersion>
     <WindowsTargetPlatformVersion Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">10.0</WindowsTargetPlatformVersion>
@@ -63,16 +63,6 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
   </PropertyGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <ClCompile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-    </ClCompile>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <ClCompile>
-      <LanguageStandard>stdcpp20</LanguageStandard>
-    </ClCompile>
-  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'" Label="Configuration">
     <ClCompile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
@@ -112,21 +102,12 @@
     </QtMoc>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <QtRcc Include="GraphApplication.qrc" />
-    <QtUic Include="GraphApplication.ui" />
-    <QtMoc Include="GraphApplication.h" />
-    <ClCompile Include="DrawingZone.cpp" />
-    <ClCompile Include="Edge.cpp" />
-    <ClCompile Include="Graph.cpp" />
-    <ClCompile Include="GraphApplication.cpp" />
+    <QtUic Include="ag_tema2.ui" />
+    <QtMoc Include="ag_tema2.h" />
+    <ClCompile Include="ag_tema2.cpp" />
     <ClCompile Include="main.cpp" />
-    <QtMoc Include="DrawingZone.h" />
-    <ClInclude Include="Edge.h" />
-    <ClInclude Include="Graph.h" />
-    <ClInclude Include="GraphType.h" />
-    <ClInclude Include="Node.h" />
+    <ClInclude Include="graph.h" />
     <ClInclude Include="stdafx.h" />
-    <ClCompile Include="Node.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">Create</PrecompiledHeader>
