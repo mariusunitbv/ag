@@ -1,6 +1,8 @@
 #pragma once
 #include <queue>
 
+// #define GRAPH_DRAW_INSTANTLY
+
 class Node {
    public:
     enum class NodeType : uint8_t {
@@ -24,26 +26,20 @@ class Node {
 
 class GridGraph {
    public:
-    ~GridGraph() {}
+    using NodePos_t = std::pair<size_t, size_t>;
 
-    Node* operator[](const std::pair<size_t, size_t>& p) {
-        return m_nodesMatrix[p.first][p.second];
-    }
+    Node& operator[](const NodePos_t& p) { return m_nodesMatrix[p.first][p.second]; }
 
     void addNode(Node::NodeType nodeType) {
         auto& lastRow = m_nodesMatrix.back();
 
-        lastRow.push_back(nodeType == Node::NodeType::WALL ? nullptr : new Node{nodeType});
+        lastRow.emplace_back(nodeType);
         if (nodeType == Node::NodeType::START) {
             m_startNode = std::make_pair(m_nodesMatrix.size() - 1, lastRow.size() - 1);
         }
     }
 
     void addRow() { m_nodesMatrix.emplace_back(); }
-
-    const auto& getStartNodeIndex() const { return m_startNode; }
-
-    auto& getGrid() { return m_nodesMatrix; }
 
     auto getGridDimensions() const {
         return std::make_pair(m_nodesMatrix.size(), m_nodesMatrix.back().size());
@@ -59,14 +55,21 @@ class GridGraph {
         m_bfsData.m_visitQueue.push(m_startNode);
     }
 
-    bool runBFSIteration() {
+    std::optional<NodePos_t> runBFSIteration() {
         while (!m_bfsData.m_visitQueue.empty()) {
             const auto& xPosition = m_bfsData.m_visitQueue.front();
-            (*this)[xPosition]->setType(Node::NodeType::CURRENTLY_ANALYZED);
+            auto& xNode = (*this)[xPosition];
+            if (xNode.getType() != Node::NodeType::CURRENTLY_ANALYZED) {
+                xNode.setType(Node::NodeType::CURRENTLY_ANALYZED);
+
+#ifndef GRAPH_DRAW_INSTANTLY
+                return xPosition;
+#endif
+            }
 
             for (size_t i = 0; i < 4; ++i) {
-                const decltype(m_startNode) yPosition = {xPosition.first + k_dirVec[i].first,
-                                                         xPosition.second + k_dirVec[i].second};
+                const NodePos_t yPosition = {xPosition.first + k_dirVec[i].first,
+                                             xPosition.second + k_dirVec[i].second};
                 if (isGoodPosition(yPosition)) {
                     size_t yFlattenedIdx =
                         yPosition.first * m_nodesMatrix.back().size() + yPosition.second;
@@ -75,41 +78,40 @@ class GridGraph {
                         m_bfsData.m_visitedNodes[yFlattenedIdx] = true;
                         m_bfsData.m_visitQueue.push(yPosition);
 
-                        (*this)[yPosition]->setType(Node::NodeType::VISITED);
-                        return true;
+                        (*this)[yPosition].setType(Node::NodeType::VISITED);
+
+#ifndef GRAPH_DRAW_INSTANTLY
+                        return yPosition;
+#endif
                     }
                 }
             }
 
-            (*this)[xPosition]->setType(Node::NodeType::ANALYZED);
+            xNode.setType(xPosition == m_startNode ? Node::NodeType::START
+                                                   : Node::NodeType::ANALYZED);
             m_bfsData.m_visitQueue.pop();
-            return true;
+
+#ifndef GRAPH_DRAW_INSTANTLY
+            return xPosition;
+#endif
         }
 
-        return false;
+        return std::nullopt;
     }
 
-    bool isGoodPosition(const std::pair<size_t, size_t>& p) {
-        if (0 <= p.first && p.first < m_nodesMatrix.size()) {
-            if (0 <= p.second && p.second < m_nodesMatrix.back().size()) {
-                Node* node = (*this)[p];
-                if (node && node->getType() == Node::NodeType::WALKABLE) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+    bool isGoodPosition(const NodePos_t& p) {
+        return p.first < m_nodesMatrix.size() && p.second < m_nodesMatrix.back().size() &&
+               (*this)[p].getType() == Node::NodeType::WALKABLE;
     }
 
    private:
     struct BFS {
         std::vector<bool> m_visitedNodes;
-        std::queue<std::pair<size_t, size_t>> m_visitQueue;
+        std::queue<NodePos_t> m_visitQueue;
     } m_bfsData;
 
-    std::vector<std::vector<Node*>> m_nodesMatrix;
-    std::pair<size_t, size_t> m_startNode;
+    std::vector<std::vector<Node>> m_nodesMatrix;
+    NodePos_t m_startNode;
 
-    static constexpr std::pair<size_t, size_t> k_dirVec[] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
+    static constexpr NodePos_t k_dirVec[] = {{0, -1}, {1, 0}, {0, 1}, {-1, 0}};
 };

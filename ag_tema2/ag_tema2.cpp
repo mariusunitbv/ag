@@ -3,7 +3,7 @@
 
 #include <fstream>
 
-const int ag_tema2::k_stepDelayMs = 1;
+const int ag_tema2::k_stepDelayMs = 400;
 
 ag_tema2::ag_tema2(QWidget* parent) : QMainWindow(parent) {
     ui.setupUi(this);
@@ -31,68 +31,92 @@ ag_tema2::ag_tema2(QWidget* parent) : QMainWindow(parent) {
     setPalette(QPalette{Qt::white});
 
     m_graph.initBFS();
-    QTimer::singleShot(100, this, &ag_tema2::updateAlgorithmState);
+
+#ifdef GRAPH_DRAW_INSTANTLY
+    ag_tema2::updateAlgorithmState();
+#else
+    m_updateTimer = new QTimer();
+    connect(m_updateTimer, &QTimer::timeout, this, &ag_tema2::updateAlgorithmState);
+    m_updateTimer->start(k_stepDelayMs);
+#endif
 }
 
-ag_tema2::~ag_tema2() {}
+ag_tema2::~ag_tema2() { delete m_updateTimer; }
 
 void ag_tema2::paintEvent(QPaintEvent* event) {
-    QPainter painter{this};
-
-    painter.setRenderHint(QPainter::Antialiasing);
-
-    drawGrid();
+    if (event->rect() == rect()) {
+        drawGrid();
+    } else {
+        drawUpdatedCells();
+    }
 }
 
 void ag_tema2::drawGrid() {
     QPainter painter{this};
 
-    const auto windowWidth = rect().width(), windowHeight = rect().height();
-
-    const auto& grid = m_graph.getGrid();
-    auto [rows, columns] = m_graph.getGridDimensions();
-    int cellWidth = windowWidth / columns, cellHeight = windowHeight / rows;
+    const auto& [rows, columns] = m_graph.getGridDimensions();
+    const int cellWidth = rect().width() / columns, cellHeight = rect().height() / rows;
 
     for (int i = 0; i < rows; ++i) {
         for (int j = 0; j < columns; ++j) {
-            const QColor cellColor = [=]() {
-                Node* node = m_graph[{i, j}];
-                if (node) {
-                    switch (node->getType()) {
-                        case Node::NodeType::WALKABLE:
-                            return Qt::white;
-                        case Node::NodeType::START:
-                            return Qt::blue;
-                        case Node::NodeType::FINISH:
-                            return Qt::red;
-                        case Node::NodeType::CURRENTLY_ANALYZED:
-                            return Qt::magenta;
-                        case Node::NodeType::VISITED:
-                            return Qt::yellow;
-                        case Node::NodeType::ANALYZED:
-                            return Qt::green;
-                    }
-                }
-                return Qt::black;
-            }();
-
             painter.drawRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
             painter.fillRect(j * cellWidth + 1, i * cellHeight + 1, cellWidth - 1, cellHeight - 1,
-                             cellColor);
+                             getNodeColor(m_graph[{i, j}]));
         }
     }
 }
 
+void ag_tema2::drawUpdatedCells() {
+    QPainter painter{this};
+
+    const auto& [rows, columns] = m_graph.getGridDimensions();
+    const int cellWidth = rect().width() / columns, cellHeight = rect().height() / rows;
+
+    for (const auto& [i, j] : m_updatedCells) {
+        painter.drawRect(j * cellWidth, i * cellHeight, cellWidth, cellHeight);
+        painter.fillRect(j * cellWidth + 1, i * cellHeight + 1, cellWidth - 1, cellHeight - 1,
+                         getNodeColor(m_graph[{i, j}]));
+    }
+
+    m_updatedCells.clear();
+}
+
 void ag_tema2::updateAlgorithmState() {
-    if (m_bfsFinished) {
+    auto lastUpdatedCell = m_graph.runBFSIteration();
+    if (!lastUpdatedCell) {
+        if (m_updateTimer) {
+            m_updateTimer->stop();
+        }
+
+        QApplication::beep();
+        update();
+
         return;
     }
 
-    if (!m_graph.runBFSIteration()) {
-        m_bfsFinished = true;
-        QApplication::beep();
+    const auto& [rows, columns] = m_graph.getGridDimensions();
+    const int cellWidth = rect().width() / columns, cellHeight = rect().height() / rows;
+
+    m_updatedCells.push_back(lastUpdatedCell.value());
+    update(lastUpdatedCell.value().second * cellWidth, lastUpdatedCell.value().first * cellHeight,
+           cellWidth, cellHeight);
+}
+
+Qt::GlobalColor ag_tema2::getNodeColor(Node node) {
+    switch (node.getType()) {
+        case Node::NodeType::WALKABLE:
+            return Qt::white;
+        case Node::NodeType::START:
+            return Qt::blue;
+        case Node::NodeType::FINISH:
+            return Qt::red;
+        case Node::NodeType::CURRENTLY_ANALYZED:
+            return Qt::magenta;
+        case Node::NodeType::VISITED:
+            return Qt::yellow;
+        case Node::NodeType::ANALYZED:
+            return Qt::green;
     }
 
-    update();
-    QTimer::singleShot(k_stepDelayMs, this, &ag_tema2::updateAlgorithmState);
+    return Qt::black;
 }
