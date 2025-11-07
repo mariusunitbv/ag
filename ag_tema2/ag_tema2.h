@@ -15,12 +15,16 @@ class ag_tema2 : public QMainWindow {
 
    private:
     void drawGrid();
+    void drawUpdatedCells();
     void updateAlgorithmState();
+    Qt::GlobalColor getNodeColor(Node node);
 
     Ui::ag_tema2Class ui;
 
     GridGraph m_graph;
-    bool m_bfsFinished;
+    std::vector<GridGraph::NodePos_t> m_updatedCells;
+
+    QTimer* m_updateTimer;
 
     static const int k_stepDelayMs;
 };
