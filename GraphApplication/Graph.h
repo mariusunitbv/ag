@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Edge.h"
-#include "GraphType.h"
 
 class Graph {
    public:
@@ -12,13 +11,15 @@ class Graph {
     void SelectNodesDescending(size_t start, size_t end);
     void DeselectAllNodes();
 
+    std::vector<std::pair<int, std::vector<Node*>>> FindAllShortestPaths();
+
     void SetDraggedNode(Node* node);
     void DragNode(Node* node, QPoint where);
 
     void ConnectNodes();
     void DeleteSelectedNodes();
 
-    void AddEdge(Node* l, Node* r);
+    void AddEdge(Node* l, Node* r, int cost);
     void TerminateEdgesOfSelectedNodes();
 
     Node* GetNearestNode(QPoint where, int additionalRadius = 0);
@@ -31,18 +32,17 @@ class Graph {
     const std::vector<Edge>& GetEdges() const;
     Node* GetDraggedNode() const;
 
-    void MakeGraphUnoriented();
-    void SetOrientedGraph(bool state);
-    bool IsOrientedGraph() const;
-
-    void SaveGraph() const;
-
     static constexpr int kEdgeArrowSize = 20;
+
+    const std::string& getTopologicalOrderDebugString() const {
+        return topologicalOrderDebugString;
+    }
 
    private:
     std::vector<Node*> m_nodes, m_selectedNodes;
     std::vector<Edge> m_edges;
 
+    std::string topologicalOrderDebugString;
+
     Node* m_draggedNode;
-    bool m_unorientedGraph;
 };

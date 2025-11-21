@@ -10,8 +10,6 @@ class DrawingZone : public QWidget {
    public:
     DrawingZone(QWidget* parent = nullptr);
 
-    bool SetGraphType(GraphType graphType);
-
    protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;

@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "Edge.h"
 
-Edge::Edge(Node* l, Node* r) : m_pair{std::make_pair(l, r)} {}
+Edge::Edge(Node* l, Node* r, int cost) : m_cost{cost}, m_pair{std::make_pair(l, r)} {}
 
 Node* Edge::GetSource() const { return m_pair.first; }
 
@@ -18,11 +18,4 @@ bool Edge::SameAs(const Edge& rhs) const {
 
 bool Edge::SameAs(Node* l, Node* r) const { return GetSource() == l && GetTarget() == r; }
 
-bool Edge::SameAsUnoriented(const Edge& rhs) const {
-    return (GetSource() == rhs.GetSource() && GetTarget() == rhs.GetTarget()) ||
-           (GetSource() == rhs.GetTarget() && GetTarget() == rhs.GetSource());
-}
-
-bool Edge::SameAsUnoriented(Node* l, Node* r) const {
-    return (GetSource() == l && GetTarget() == r) || (GetSource() == r && GetTarget() == l);
-}
+int Edge::GetCost() const { return m_cost; }

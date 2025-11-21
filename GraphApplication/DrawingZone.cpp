@@ -1,43 +1,11 @@
 #include "stdafx.h"
 #include "DrawingZone.h"
 
+static std::vector<std::pair<int, std::vector<Node*>>> m_paths;
+
 DrawingZone::DrawingZone(QWidget* parent)
     : m_regularFont("Consolas", 14), m_smallFont("Consolas", 8) {
     setFocusPolicy(Qt::ClickFocus);
-
-    m_graph.SetOrientedGraph(true);
-}
-
-bool DrawingZone::SetGraphType(GraphType graphType) {
-    switch (graphType) {
-        case GraphType::ORIENTED:
-            m_graph.SetOrientedGraph(true);
-            break;
-        case GraphType::UNORIENTED:
-            if (m_graph.GetEdges().size() > 1) {
-                const auto reply =
-                    QMessageBox::warning(this, "Atentie",
-                                         "Unele arce ar putea fi sterse, pentru a putea face "
-                                         "graful neorientat.\nContinuam?",
-                                         QMessageBox::Yes | QMessageBox::No);
-
-                if (reply == QMessageBox::Yes) {
-                    m_graph.MakeGraphUnoriented();
-                } else {
-                    this->setFocus();
-                    return false;
-                }
-            }
-
-            m_graph.SetOrientedGraph(false);
-            break;
-    }
-
-    this->setFocus();
-    update();
-
-    m_graph.SaveGraph();
-    return true;
 }
 
 void DrawingZone::mousePressEvent(QMouseEvent* event) {
@@ -130,6 +98,28 @@ void DrawingZone::keyPressEvent(QKeyEvent* event) {
             m_graph.SelectNodesDescending(m_graph.GetNodes().size() - 1, 0);
             update();
             break;
+        case Qt::Key_Space:
+            m_paths = m_graph.FindAllShortestPaths();
+
+            for (size_t i = 0; i < m_paths.size(); ++i) {
+                auto& [startingNode, path] = m_paths[i];
+                if (path.empty()) {
+                    QMessageBox::information(
+                        nullptr, "Info",
+                        QString("Nu s-a gasit drum la nodul %1").arg(startingNode + 1));
+                } else {
+                    std::string drum;
+                    for (auto& node : path) {
+                        drum.append(std::to_string(node->GetIndex() + 1) + ' ');
+                    }
+                    QMessageBox::information(nullptr, "Info",
+                                             QString("Cel mai scurt drum pana la nodul %1: %2")
+                                                 .arg(startingNode + 1)
+                                                 .arg(drum));
+                }
+            }
+            update();
+            break;
     }
 }
 
@@ -139,6 +129,11 @@ void DrawingZone::paintEvent(QPaintEvent* event) {
     painter.setRenderHint(QPainter::Antialiasing);
     painter.fillRect(rect(), Qt::white);
     painter.setFont(m_regularFont);
+
+    painter.setPen(Qt::black);
+    if (m_graph.getTopologicalOrderDebugString().size() > 0) {
+        painter.drawText(10, 20, QString::fromStdString(m_graph.getTopologicalOrderDebugString()));
+    }
 
     DrawNodes(&painter);
     DrawEdges(&painter);
@@ -182,17 +177,30 @@ void DrawingZone::DrawEdges(QPainter* painter) const {
         const QPoint lineEnd = targetCenter - radiusOffset;
 
         painter->drawLine(lineStart, lineEnd);
-        if (m_graph.IsOrientedGraph()) {
-            const double angle = std::atan2(-direction.y(), direction.x());
-            const QPoint arrowP1 = lineEnd - QPoint(sin(angle + M_PI / 3) * Graph::kEdgeArrowSize,
-                                                    cos(angle + M_PI / 3) * Graph::kEdgeArrowSize);
-            const QPoint arrowP2 =
-                lineEnd - QPoint(sin(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize,
-                                 cos(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize);
-            const QPolygon arrowHead{lineEnd, arrowP1, arrowP2};
 
-            painter->setBrush(edge.IsSelected() ? Qt::green : Qt::black);
-            painter->drawPolygon(arrowHead);
+        const double angle = std::atan2(-direction.y(), direction.x());
+        const QPoint arrowP1 = lineEnd - QPoint(sin(angle + M_PI / 3) * Graph::kEdgeArrowSize,
+                                                cos(angle + M_PI / 3) * Graph::kEdgeArrowSize);
+        const QPoint arrowP2 =
+            lineEnd - QPoint(sin(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize,
+                             cos(angle + M_PI - M_PI / 3) * Graph::kEdgeArrowSize);
+        const QPolygon arrowHead{lineEnd, arrowP1, arrowP2};
+
+        painter->setBrush(edge.IsSelected() ? Qt::green : Qt::black);
+        painter->drawPolygon(arrowHead);
+
+        if (edge.GetCost() > 0) {
+            QPoint midPoint = (lineStart + lineEnd) / 2.0;
+            double angleDeg = -angle * 180.0 / M_PI;
+            if (angleDeg < -90 || angleDeg > 90) {
+                angleDeg += 180;  // flip text
+            }
+
+            painter->save();
+            painter->translate(midPoint);
+            painter->rotate(angleDeg);
+            painter->drawText(QPoint(0, -4), QString::number(edge.GetCost()));
+            painter->restore();
         }
     }
 }

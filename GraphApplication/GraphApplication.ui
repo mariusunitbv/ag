@@ -36,30 +36,6 @@
        </sizepolicy>
       </property>
       <layout class="QGridLayout" name="gridLayout">
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Proiect realizat de</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QRadioButton" name="orientedRadioButton">
-         <property name="text">
-          <string>Orientat</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_4">
-         <property name="text">
-          <string>Lista keybind-uri:</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="0">
         <widget class="QLabel" name="label">
          <property name="sizePolicy">
@@ -69,56 +45,35 @@
           </sizepolicy>
          </property>
          <property name="text">
-          <string>Aplicație Grafuri</string>
+          <string>Tema 3</string>
          </property>
         </widget>
        </item>
-       <item row="1" column="2">
+       <item row="1" column="1">
         <widget class="QLabel" name="label_5">
          <property name="text">
           <string>PgUp/PgDown -&gt; Selecteaza toate nodurile cresc/desc</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Tipul grafului:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="label_6">
-         <property name="text">
-          <string>Enter - Uneste nodurile selectate</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QRadioButton" name="unorientedRadioButton">
-         <property name="text">
-          <string>Neorientat</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
+       <item row="1" column="2">
         <widget class="QLabel" name="label_7">
          <property name="text">
           <string>Del -&gt; Sterge nodurile selectate</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="3">
-        <widget class="QLabel" name="label_8">
+       <item row="2" column="1">
+        <widget class="QLabel" name="label_6">
          <property name="text">
-          <string>Home -&gt; Deselecteaza nodurile</string>
+          <string>Enter - Uneste nodurile selectate</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
-        <widget class="QLabel" name="label_9">
+       <item row="2" column="2">
+        <widget class="QLabel" name="label_8">
          <property name="text">
-          <string>End -&gt; Termina arcele selectate</string>
+          <string>Home -&gt; Deselecteaza nodurile</string>
          </property>
         </widget>
        </item>
@@ -129,15 +84,33 @@
          </property>
         </widget>
        </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_2">
+         <property name="text">
+          <string>Proiect realizat de</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QLabel" name="label_9">
+         <property name="text">
+          <string>End -&gt; Termina arcele selectate</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLabel" name="label_4">
+         <property name="text">
+          <string>Lista keybind-uri:</string>
+         </property>
+        </widget>
+       </item>
       </layout>
-      <zorder>orientedRadioButton</zorder>
       <zorder>label</zorder>
-      <zorder>label_3</zorder>
       <zorder>label_2</zorder>
       <zorder>label_4</zorder>
       <zorder>label_5</zorder>
       <zorder>label_6</zorder>
-      <zorder>unorientedRadioButton</zorder>
       <zorder>label_7</zorder>
       <zorder>label_8</zorder>
       <zorder>label_9</zorder>
@@ -148,35 +121,6 @@
      <widget class="DrawingZone" name="drawingZone" native="true"/>
     </item>
    </layout>
-  </widget>
-  <widget class="QStatusBar" name="statusBar"/>
-  <widget class="QMenuBar" name="menuBar">
-   <property name="geometry">
-    <rect>
-     <x>0</x>
-     <y>0</y>
-     <width>800</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <widget class="QMenu" name="menuFisier">
-    <property name="geometry">
-     <rect>
-      <x>282</x>
-      <y>198</y>
-      <width>153</width>
-      <height>72</height>
-     </rect>
-    </property>
-    <property name="title">
-     <string>Fisier</string>
-    </property>
-    <property name="toolTipsVisible">
-     <bool>true</bool>
-    </property>
-    <addaction name="actionMatrice_adiacenta"/>
-   </widget>
-   <addaction name="menuFisier"/>
   </widget>
   <action name="actionMatrice_adiacenta">
    <property name="checkable">
